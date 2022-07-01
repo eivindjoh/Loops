@@ -1,39 +1,40 @@
 import math
 import scipy.stats as stats
+import matplotlib.pyplot as plt
+
+
+def throw_distance(velocity, angle):
+    throw_angle = math.radians(angle)
+    throw_velocity = velocity / 3.6
+    throw_velocity_y = throw_velocity * math.cos(throw_angle)
+    throw_velocity_z = throw_velocity * math.sin(throw_angle)
+    air_time = (throw_velocity_z + math.sqrt((throw_velocity_z ** 2) + (2 * 9.81 * 1.8))) / 9.81
+    distance = throw_velocity_y * air_time
+    return distance
 
 
 def thorkildsen_throw():
-    thorkildsen_velocity = stats.weibull_max.rvs(2, loc=107, scale=4, size=1)[0]
-    thorkildsen_angle = stats.norm.rvs(48, 7, 1)[0]
-    throw_angle = math.radians(thorkildsen_angle)
-    throw_velocity = thorkildsen_velocity / 3.6
-    throw_velocity_y = throw_velocity * math.cos(throw_angle)
-    throw_velocity_z = throw_velocity * math.sin(throw_angle)
-    air_time = (throw_velocity_z + math.sqrt((throw_velocity_z ** 2) + (2 * 9.81 * 1.8))) / 9.81
-    throw_distance = throw_velocity_y * air_time
-    return throw_distance
+    velocity = stats.weibull_max.rvs(2, loc=107, scale=4, size=1)[0]
+    angle = stats.norm.rvs(48, 7, 1)[0]
+    distance = throw_distance(velocity, angle)
+    return distance
 
 
 def pitkamaki_throw():
-    pitkamaki_velocity = stats.weibull_max.rvs(2, loc=106.5, scale=3, size=1)[0]
-    pitkamaki_angle = stats.norm.rvs(45.5, 4, 1)[0]
-    throw_angle = math.radians(pitkamaki_angle)
-    throw_velocity = pitkamaki_velocity / 3.6
-    throw_velocity_y = throw_velocity * math.cos(throw_angle)
-    throw_velocity_z = throw_velocity * math.sin(throw_angle)
-    air_time = (throw_velocity_z + math.sqrt((throw_velocity_z ** 2) + (2 * 9.81 * 1.8))) / 9.81
-    throw_distance = throw_velocity_y * air_time
-    return throw_distance
+    velocity = stats.weibull_max.rvs(2, loc=106.5, scale=3, size=1)[0]
+    angle = stats.norm.rvs(45.5, 4, 1)[0]
+    distance = throw_distance(velocity, angle)
+    return distance
 
 
-def pitkamaki_competion_best(numb_throw=6):
+def pitkamaki_competition_best(numb_throw=6):
     throws = []
     for i in range(numb_throw):
         throws.append(pitkamaki_throw())
     return max(throws)
 
 
-def thorkildsen_competion_best(numb_throw=6):
+def thorkildsen_competition_best(numb_throw=6):
     throws = []
     for i in range(numb_throw):
         throws.append(thorkildsen_throw())
@@ -46,8 +47,8 @@ def results_comp(numb_trow=6):
     pitkamaki_results = []
 
     for i in range(1000):
-        thorkildsen_results.append(thorkildsen_competion_best(numb_trow))
-        pitkamaki_results.append(pitkamaki_competion_best(numb_trow))
+        thorkildsen_results.append(thorkildsen_competition_best(numb_trow))
+        pitkamaki_results.append(pitkamaki_competition_best(numb_trow))
 
     thorkildsen_wins = 0
     pitkamaki_wins = 0
@@ -82,6 +83,15 @@ def results_comp(numb_trow=6):
     print('\n95% confidence for their winning throw length:')
     print(f'lower_value: {round(values[lower_idx], 2)}m')
     print(f'upper_value: {round(values[upper_idx], 2)}m\n')
+
+    num_bins = 50
+    plt.hist(thorkildsen_results, num_bins, facecolor='blue', alpha=0.5)
+    plt.hist(pitkamaki_results, num_bins, facecolor='red', alpha=0.5)
+    plt.xlabel('Distance in meters')
+    plt.ylabel('Number of throws')
+    plt.title(f"Histogram of comp with {numb_trow} throws")
+    plt.legend(['Thorkildsen', 'Pitkamaki'])
+    plt.show()
 
 
 results_comp()
